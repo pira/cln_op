@@ -3,7 +3,7 @@
 # Compares current suez output to previous run
 # Obviously needs suez: https://github.com/prusnak/suez
 #
-SUEZ_DIR='$HOME/suez'
+SUEZ_DIR="$HOME/suez"
 STATUS_DIR='statuses'
 TEMP_STATUS='curr.status'
 stamp=`date '+%Y-%m-%d-%H%M%S'`
