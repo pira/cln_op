@@ -1,0 +1,10 @@
+echo "Importing CLN aliases"
+
+alias l='lightning-cli '
+alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-scores'
+# Set channel fee
+lnchan() {
+        echo "Setting channel fees to $2"
+        lightning-cli setchannel $1 0 $2
+}
+
