@@ -1,11 +1,14 @@
 echo "Importing CLN aliases"
 
 alias l='lightning-cli '
+# runs suez with chan ids
 alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-scores'
-# Set channel fee
+# Set channel fee, appends 99 to ppm, 0 base
 lnchan() {
 	fee="${2}99"
         echo "Setting channel fees to $fee"
         lightning-cli setchannel $1 0 $fee
 }
+# list all nodes with liquidity ads
+alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
 
