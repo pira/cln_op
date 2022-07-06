@@ -2,7 +2,7 @@ echo "Importing CLN aliases"
 
 alias l='lightning-cli '
 # runs suez with chan ids
-alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-scores'
+alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
 # Set channel fee, appends 99 to ppm, 0 base
 lnchan() {
 	fee="${2}99"
@@ -11,4 +11,12 @@ lnchan() {
 }
 # list all nodes with liquidity ads
 alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
-
+# open dual funded channel with default of 10m on each side
+lndualopen() {
+        if [ "$#" -ne 2 ]; then
+   		echo "Must specify node_id and compact_lease to open dualfunded channel"
+	else
+        	echo "Opening 10m sat dual funded channel to $1"
+		lightning-cli fundchannel -k id=$1 amount=0.1btc request_amt=0.1btc compact_lease=$2
+	fi
+}
