@@ -18,7 +18,7 @@ then
 		echo "Comparing current to $prev_status"
 		sort -k 7 temp.status >/tmp/suez.status.1
 		sort -k 7 $prev_status >/tmp/suez.status.2
-		result=`diff -U 0 /tmp/suez.status.2 /tmp/suez.status.1`
+		result=`diff -w -U 0 /tmp/suez.status.2 /tmp/suez.status.1`
 		echo "$result"
 	else
 		echo "Empty $STATUS_DIR, will populate"
