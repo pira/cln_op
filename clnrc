@@ -1,8 +1,12 @@
-echo "Importing CLN aliases"
+
+CLN_DIR=$( dirname -- "$( readlink -f -- "$0"; )"; )
+echo "Importing CLN aliases from $CLN_DIR"
 
 alias l='lightning-cli '
-# runs suez with chan ids
+#
+# runs suez with chan ids and forwarding stats
 alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
+#
 # Set channel fee, appends 99 to ppm, 0 base
 lnchan() {
 	fee="${2}99"
@@ -11,6 +15,7 @@ lnchan() {
 }
 # list all nodes with liquidity ads
 alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
+#
 # open dual funded channel with default of 10m on each side
 lndualopen() {
         if [ "$#" -ne 2 ]; then
@@ -19,4 +24,40 @@ lndualopen() {
         	echo "Opening 10m sat dual funded channel to $1"
 		lightning-cli fundchannel -k id=$1 amount=0.1btc request_amt=0.1btc compact_lease=$2
 	fi
+}
+#
+# closes channel marking the peer as bad
+lnclose() {
+	if [ "$#" -ne 1 ]; then
+		echo "Must specify short channel id to close"
+	else
+		peer=`lnpeerbychan "$1"`
+		echo $peer >> $CLN_DIR/badpeers
+		lightning-cli close "$1"
+		echo "Channel $1 closed and peer $peer marked as bad"
+	fi
+}
+#
+# opens the channel checking if the peer is in the badlist
+lnopen() {
+	if [ "$#" -ne 2 ]; then
+		echo "Must specify node_id and amount (sats) to open a channel"
+	else
+		if grep -Fxq $1	$CLN_DIR/badpeers ; then
+			echo "Node $1 is in $CLN_DIR/badpeers list, won't proceed!"
+		else
+			echo "Good, opening channel"
+			lightning-cli fundchannel -k id=$1 amount=$2
+			# push_msat= to gift some sats to the peer
+		fi
+	fi
+}
+#
+# finds peer id by short channel id
+lnpeerbychan() {
+	if [ "$#" -ne 1 ]; then
+                echo "Must specify short_channel_id to lookup peer id"
+        else
+		lightning-cli listpeers | jq '.peers[] | select( .channels[].short_channel_id == "'$1'" ) | .id' | sed s/\"//g
+        fi
 }
