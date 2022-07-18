@@ -27,12 +27,13 @@ lndualopen() {
 }
 #
 # closes channel marking the peer as bad
+BAD_PEERS="$CLN_DIR/badpeers"
 lnclose() {
 	if [ "$#" -ne 1 ]; then
 		echo "Must specify short channel id to close"
 	else
 		peer=`lnpeerbychan "$1"`
-		echo $peer >> $CLN_DIR/badpeers
+		echo $peer >> $BAD_PEERS
 		lightning-cli close "$1"
 		echo "Channel $1 closed and peer $peer marked as bad"
 	fi
@@ -43,13 +44,19 @@ lnopen() {
 	if [ "$#" -ne 2 ]; then
 		echo "Must specify node_id and amount (sats) to open a channel"
 	else
-		if grep -Fxq $1	$CLN_DIR/badpeers ; then
-			echo "Node $1 is in $CLN_DIR/badpeers list, won't proceed!"
-		else
-			echo "Good, opening channel"
-			lightning-cli fundchannel -k id=$1 amount=$2
-			# push_msat= to gift some sats to the peer
-		fi
+		case `grep -Fx "$1" "$BAD_PEERS" > /dev/null; echo $?` in
+			0)
+				echo "Node $1 is in $BAD_PEERS list, won't proceed!"
+				;;
+			1)
+				echo "Good, opening channel"
+				lightning-cli fundchannel -k id=$1 amount=$2
+				# push_msat= to gift some sats to the peer
+				;;
+			*)
+				echo "Oops. Error occured, no channel opened"
+				;;
+		esac
 	fi
 }
 #
