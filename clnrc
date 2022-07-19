@@ -1,6 +1,6 @@
 
-CLN_DIR=$( dirname -- "$( readlink -f -- "$0"; )"; )
-echo "Importing CLN aliases from $CLN_DIR"
+CLN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Importing CLN aliases from $CLN_DIR/clnrc"
 
 alias l='lightning-cli '
 #
