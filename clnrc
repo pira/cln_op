@@ -16,16 +16,6 @@ lnchan() {
 # list all nodes with liquidity ads
 alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
 #
-# open dual funded channel with default of 10m on each side
-lndualopen() {
-        if [ "$#" -ne 2 ]; then
-   		echo "Must specify node_id and compact_lease to open dualfunded channel"
-	else
-        	echo "Opening 10m sat dual funded channel to $1"
-		lightning-cli fundchannel -k id=$1 amount=0.1btc request_amt=0.1btc compact_lease=$2
-	fi
-}
-#
 # closes channel marking the peer as bad
 BAD_PEERS="$CLN_DIR/badpeers"
 lnclose() {
@@ -33,9 +23,14 @@ lnclose() {
 		echo "Must specify short channel id to close"
 	else
 		peer=`lnpeerbychan "$1"`
-		echo $peer >> $BAD_PEERS
-		lightning-cli close "$1"
-		echo "Channel $1 closed and peer $peer marked as bad"
+		if grep -Fxq "$1" "$BAD_PEERS" ; then
+			echo $peer >> $BAD_PEERS
+			echo "Peer $peer marked as bad"
+		else
+			echo "Peer $peer was already marked as bad, too bad"
+		fi
+		lightning-cli close -k id="$1" feerange="[1,11]" unilateraltimeout=240 && \
+		echo "Channel $1 closed"
 	fi
 }
 #
@@ -49,14 +44,24 @@ lnopen() {
 				echo "Node $1 is in $BAD_PEERS list, won't proceed!"
 				;;
 			1)
-				echo "Good, opening channel"
-				lightning-cli fundchannel -k id=$1 amount=$2
 				# push_msat= to gift some sats to the peer
+				lightning-cli fundchannel -k id=$1 amount=$2 && \
+				echo "Good, opened channel"
 				;;
 			*)
 				echo "Oops. Error occured, no channel opened"
 				;;
 		esac
+	fi
+}
+#
+# Opens a dualfunded channel based on liquid ad
+lnopendual() {
+	if [ "$#" -ne 3 ]; then
+		echo "Must specify node_id, amount (btc) and compact lease id to open dual funded channel"
+	else
+		lightning-cli fundchannel -k id=$1 amount=${2}btc request_amt=${2}btc compact_lease=$3 && \
+		echo "Good, opened a dual-funded channel"
 	fi
 }
 #
