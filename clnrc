@@ -6,6 +6,16 @@ alias l='lightning-cli '
 #
 # runs suez with chan ids and forwarding stats
 alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
+# total routed volume
+routed() {
+	echo "Calculating..."
+	tmp=$((`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .out_msatoshi' | awk '{n += \$1}; END{print n}' ` / 1000 ))
+	routed_sats=`numfmt --g $tmp`
+	tmp=$((`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .fee' | awk '{n += \$1}; END{print n}' ` / 1000))
+	total_fees=`numfmt --g $tmp`
+	echo "We routed $routed_sats sats with $total_fees sats in fees"
+}
+alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee' | awk '{n += \$1}; END{print n}' | numfmt --g"
 #
 # Set channel fee, appends 99 to ppm, 0 base
 lnchan() {
