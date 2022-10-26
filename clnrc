@@ -17,11 +17,21 @@ routed() {
 }
 alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee' | awk '{n += \$1}; END{print n}' | numfmt --g"
 #
-# Set channel fee, appends 99 to ppm, 0 base
+# Set channel fees and htlc limits, appends 99 to ppm, 0 base
 lnchan() {
 	fee="${2}99"
-        echo "Setting channel fees to $fee"
-        lightning-cli setchannel $1 0 $fee
+	size=`lightning-cli listpeers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
+	if [ $size -lt 10000 ]; then
+	    size=1000
+        elif [ $size -lt 1000000000 ]; then
+            size=19876000
+        elif [ $size -lt 5000000000 ]; then
+            size=987654000
+	else
+            size=2345678000
+	fi
+        echo "Setting channel fees to $fee and max htlc to $size"
+        lightning-cli setchannel $1 0 $fee 1000 $size 
 }
 # list all nodes with liquidity ads
 alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
@@ -83,3 +93,4 @@ lnpeerbychan() {
 		lightning-cli listpeers | jq '.peers[] | select( .channels[].short_channel_id == "'$1'" ) | .id' | sed s/\"//g
         fi
 }
+
