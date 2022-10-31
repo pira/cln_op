@@ -21,12 +21,10 @@ alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \
 lnchan() {
 	fee="${2}99"
 	size=`lightning-cli listpeers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
-	if [ $size -lt 10000 ]; then
+	if [ $size -lt 50000 ]; then
 	    size=1000
-        elif [ $size -lt 1000000000 ]; then
-            size=19876000
-        elif [ $size -lt 5000000000 ]; then
-            size=987654000
+        elif [ $size -lt 10000000000 ]; then
+            size=$((size / 5))
 	else
             size=2345678000
 	fi
