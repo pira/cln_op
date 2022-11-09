@@ -5,8 +5,10 @@ echo "Importing CLN aliases from $CLN_DIR/clnrc"
 
 alias l='lightning-cli '
 #
-# runs suez with chan ids and forwarding stats
+# Install suez:  https://github.com/prusnak/suez
+# Runs suez with chan ids and forwarding stats
 alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
+#
 # total routed volume
 routed() {
 	echo "Calculating..."
@@ -16,6 +18,8 @@ routed() {
 	total_fees=`numfmt --g $tmp`
 	echo "We routed $routed_sats sats with $total_fees sats in fees"
 }
+#
+# Total fees
 alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee' | awk '{n += \$1}; END{print n}' | numfmt --g"
 #
 # Set channel fees and htlc limits, appends 99 to ppm, 0 base
@@ -32,6 +36,7 @@ lnchan() {
         echo "Setting channel fees to $fee and max htlc to $size"
         lightning-cli setchannel $1 0 $fee 1000 $size 
 }
+#
 # list all nodes with liquidity ads
 alias l-ads='lightning-cli listnodes | grep -B20 -A7 option_will_fund'
 #
@@ -53,7 +58,7 @@ lnclose() {
 	fi
 }
 #
-# opens the channel checking if the peer is in the badlist
+# Opens the channel checking if the peer is in the badlist
 lnopen() {
 	if [ "$#" -ne 2 ]; then
 		echo "Must specify node_id and amount (sats) to open a channel"
@@ -92,6 +97,9 @@ lnpeerbychan() {
 		lightning-cli listpeers | jq '.peers[] | select( .channels[].short_channel_id == "'$1'" ) | .id' | sed s/\"//g
         fi
 }
+#
+# Couple rebalancing commands, you will need circular plugin for them to work:
+# https://github.com/giovannizotta/circular.git
 #
 # Rebalances out using circular
 lcpush() {
