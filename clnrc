@@ -91,4 +91,24 @@ lnpeerbychan() {
 		lightning-cli listpeers | jq '.peers[] | select( .channels[].short_channel_id == "'$1'" ) | .id' | sed s/\"//g
         fi
 }
+#
+# Rebalances out using circular
+lcpush() {
+	if [ "$#" -ne 1 ]; then
+		echo "Must specify short_channel_id to rebalance 2M sats"
+	else
+		echo "Rebalancing out..."
+		lightning-cli circular-push -k amount=2000000 maxppm=400 filluptopercent=0.41 outscid=$1
+	fi
+}
+#
+# Rebalances in using circular
+lcpull() {
+	if [ "$#" -ne 1 ]; then
+		echo "Must specify short_channel_id to rebalance 2M sats"
+	else
+		echo "Rebalancing in..."
+		lightning-cli circular-pull -k amount=2000000 maxoutppm=300 maxppm=400 depleteuptopercent=0.37 depleteuptoamount=2500500 inscid=$1
+	fi
+}
 
