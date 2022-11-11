@@ -1,5 +1,6 @@
 
 CLN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATH=$PATH:$CLN_DIR
 echo "Importing CLN aliases from $CLN_DIR/clnrc"
 
 alias l='lightning-cli '
