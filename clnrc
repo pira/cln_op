@@ -7,7 +7,7 @@ alias l='lightning-cli '
 #
 # Install suez:  https://github.com/prusnak/suez
 # Runs suez with chan ids and forwarding stats
-alias s='cd $HOME/suez && poetry run ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
+alias s='cd $HOME/suez && python3 ./suez --client=c-lightning --show-chan-ids --show-forwarding-stats'
 #
 # total routed volume
 routed() {
