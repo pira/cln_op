@@ -8,7 +8,7 @@ STATUS_DIR='statuses'
 stamp=`date '+%Y-%m-%d-%H%M%S'`
 
 cd $SUEZ_DIR
-python3 ./suez --show-chan-ids --client=c-lightning | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; OFS = ""; } { $6=$7=$8=$9="";  print $NF,$0; }' | sed 's/[ ]\+/ /g' | grep '|' >temp.status
+python3 ./suez --show-chan-ids --client=c-lightning | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; OFS = " "; } { $6=$7=$8=$9="";  print $NF,$0; }' | sed 's/[ ]\+/ /g' | grep '|' >temp.status
 
 # Compare two given status files and display result. Recent first
 fn_compare() {
