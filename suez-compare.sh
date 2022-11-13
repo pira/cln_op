@@ -8,12 +8,12 @@ STATUS_DIR='statuses'
 stamp=`date '+%Y-%m-%d-%H%M%S'`
 
 cd $SUEZ_DIR
-python3 ./suez --show-chan-ids --client=c-lightning | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; OFS = ""; } { $6=$7=$8=$9="";  print $0; }' >temp.status
+python3 ./suez --show-chan-ids --client=c-lightning | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; OFS = ""; } { $6=$7=$8=$9="";  print $NF,$0; }' | sed 's/[ ]\+/ /g' | grep '|' >temp.status
 
 # Compare two given status files and display result. Recent first
 fn_compare() {
-	sort -k 7 $1 >/tmp/suez.status.1
-	sort -k 7 $2 >/tmp/suez.status.2
+	sort -k 1 $1 >/tmp/suez.status.1
+	sort -k 1 $2 >/tmp/suez.status.2
 	result=`diff -w -U 0 /tmp/suez.status.2 /tmp/suez.status.1`
 	echo "$result"
 }
