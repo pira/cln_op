@@ -8,14 +8,13 @@ STATUS_DIR='statuses'
 stamp=`date '+%Y-%m-%d-%H%M%S'`
 
 cd $SUEZ_DIR
-python3 ./suez --show-chan-ids --client=c-lightning | grep '|' | tr -s ' ' | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; } { printf "%16s [%13s <=> %-13s] f: %5s s: %8s ",$NF,$1,$3,$5,$9; } { $1=$2=$3=$4=$5=$6=$7=$8=$9=$NF=""; print $0}' >temp.status
+python3 ./suez --show-chan-ids --client=c-lightning | grep '|' | tr -s ' ' | awk 'BEGIN { FPAT = "([[:space:]]*[[:alnum:][:punct:][:digit:]]+)"; } { printf "%16s [%13s <=> %-13s] f: %5s s: %8s ",$NF,$1,$3,$5,$9; } { $1=$2=$3=$4=$5=$6=$7=$8=$9=$NF=""; print $0}' | sort -k 1 >temp.status
 
 # Compare two given status files and display result. Recent first
 fn_compare() {
-	sort -k 1 $1 >/tmp/suez.status.1
-	sort -k 1 $2 >/tmp/suez.status.2
-	result=`diff -w -U 0 /tmp/suez.status.2 /tmp/suez.status.1`
-	echo "$result"
+	#result=`diff -w -U 0 $2 $1`
+	result=`comm -3 --output-delimiter='' $2 $1` 
+	echo "$result" | sed '0~2 a\\'
 }
 
 if [ -d $STATUS_DIR ];
