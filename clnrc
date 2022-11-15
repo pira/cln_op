@@ -48,10 +48,10 @@ lnclose() {
 	else
 		peer=`lnpeerbychan "$1"`
 		if grep -Fxq "$1" "$BAD_PEERS" ; then
+			echo "Peer $peer was already marked as bad, too bad"
+		else
 			echo $peer >> $BAD_PEERS
 			echo "Peer $peer marked as bad"
-		else
-			echo "Peer $peer was already marked as bad, too bad"
 		fi
 		lightning-cli close -k id="$1" feerange="[1,11]" unilateraltimeout=240 && \
 		echo "Channel $1 closed"
