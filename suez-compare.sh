@@ -13,8 +13,8 @@ python3 ./suez --show-chan-ids --client=c-lightning | grep '|' | tr -s ' ' | awk
 # Compare two given status files and display result. Recent first
 fn_compare() {
 	#result=`diff -w -U 0 $2 $1`
-	result=`sdiff -w 360 -W -s $2 $1 | tr '|' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//'` 
-	echo "$result" | sed '0~2 a\\' 
+	result=`sdiff -w 360 -W -s $2 $1 | sed G | tr '|' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//'` 
+	echo "$result"
 }
 
 if [ -d $STATUS_DIR ];
