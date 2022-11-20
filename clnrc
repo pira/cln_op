@@ -69,7 +69,7 @@ lnopen() {
 				;;
 			1)
 				# push_msat= to gift some sats to the peer
-				lightning-cli fundchannel -k id=$1 amount=$2 && \
+				lightning-cli fundchannel -k id=$1 amount=$2 feerate=slow announce=true && \
 				echo "Good, opened channel"
 				;;
 			*)
