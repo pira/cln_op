@@ -42,7 +42,7 @@ lnchan() {
 	else
 	    size=$((size / 20))
 	fi
-        echo "Setting channel fees to $fee and max htlc to $size, channel has $ratio% on our side"
+        echo "Setting channel fees to $fee and max htlc to $((size/1000))sats, channel has $ratio% on our side"
         lightning-cli setchannel $1 0 $fee 1000 $size 
 }
 #
