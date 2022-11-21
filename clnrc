@@ -25,15 +25,24 @@ alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \
 # Set channel fees and htlc limits, appends 99 to ppm, 0 base
 lnchan() {
 	fee="${2}99"
-	size=`lightning-cli listpeers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
-	if [ $size -lt 50000 ]; then
-	    size=1000
-        elif [ $size -lt 10000000000 ]; then
-            size=$((size / 5))
+	peers=`lightning-cli listpeers`
+	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
+	total=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_total ' `
+	ratio=$((100 * size / total))
+	# ratio is percent of channel liquidity on our side	
+	# we want to limit max_htlc severely on depleting channels while allowing rebalances
+	if [ $ratio -gt 60 ]; then
+	    size=$((size / 2))
+	elif [ $ratio -gt 40 ]; then
+	    size=$((size / 3))
+	elif [ $ratio -gt 20 ]; then
+	    size=$((size / 5))
+	elif [ $ratio -gt 5 ]; then
+	    size=$((size / 10))
 	else
-            size=2345678000
+	    size=$((size / 20))
 	fi
-        echo "Setting channel fees to $fee and max htlc to $size"
+        echo "Setting channel fees to $fee and max htlc to $size, channel has $ratio% on our side"
         lightning-cli setchannel $1 0 $fee 1000 $size 
 }
 #
