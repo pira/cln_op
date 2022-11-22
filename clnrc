@@ -12,11 +12,11 @@ alias s='cd $HOME/suez && python3 ./suez --client=c-lightning --show-chan-ids --
 # total routed volume
 routed() {
 	echo "Calculating..."
-	tmp=$((`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .out_msatoshi' | awk '{n += \$1}; END{print n}' ` / 1000 ))
-	routed_sats=`numfmt --g $tmp`
-	tmp=$((`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .fee' | awk '{n += \$1}; END{print n}' ` / 1000))
-	total_fees=`numfmt --g $tmp`
-	echo "We routed $routed_sats sats with $total_fees sats in fees"
+	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .out_msatoshi' | awk '{n += \$1}; END{print n}' `
+	routed_sats=`_readable_msats $tmp`
+	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .fee' | awk '{n += \$1}; END{print n}' `
+	total_fees=`_readable_msats $tmp`
+	echo "We routed $routed_sats with $total_fees in fees"
 }
 #
 # Total fees
@@ -42,7 +42,8 @@ lnchan() {
 	else
 	    size=$((size / 20))
 	fi
-        echo "Setting channel fees to $fee and max htlc to $((size/1000))sats, channel has $ratio% on our side"
+	human_size=`_readable_msats $size`
+        echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
         lightning-cli setchannel $1 0 $fee 1000 $size 
 }
 #
@@ -113,7 +114,7 @@ lnpeerbychan() {
 # Rebalances out using circular
 lcpush() {
 	if [ "$#" -ne 1 ]; then
-		echo "Must specify short_channel_id to rebalance 2M sats"
+		echo "Must specify short_channel_id to rebalance 2Mˢ"
 	else
 		echo "Rebalancing out..."
 		lightning-cli circular-push -k amount=2000000 maxppm=400 filluptopercent=0.41 outscid=$1
@@ -123,10 +124,18 @@ lcpush() {
 # Rebalances in using circular
 lcpull() {
 	if [ "$#" -ne 1 ]; then
-		echo "Must specify short_channel_id to rebalance 2M sats"
+		echo "Must specify short_channel_id to rebalance 2Mˢ"
 	else
 		echo "Rebalancing in..."
 		lightning-cli circular-pull -k amount=2000000 maxoutppm=300 maxppm=400 depleteuptopercent=0.37 depleteuptoamount=2500500 inscid=$1
 	fi
 }
-
+# return human readable msat representation
+_readable_msats() {
+	msats=$1
+	if [ $msats -gt 100000000000 ]; then
+	    numfmt --to=si --suffix='₿' $((msats / 100000000000))
+	else 
+	    numfmt --to=si --suffix='ˢ' $((msats / 1000))
+	fi
+}
