@@ -42,9 +42,11 @@ lnchan() {
 	else
 	    size=$((size / 20))
 	fi
+	min_size=1000
+	size=$((size > min_size ? size : min_size ))
 	human_size=`_readable_msats $size`
         echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
-        lightning-cli setchannel $1 0 $fee 1000 $size 
+        lightning-cli setchannel $1 0 $fee $min_size $size 
 }
 #
 # list all nodes with liquidity ads
@@ -136,6 +138,6 @@ _readable_msats() {
 	if [ $msats -gt 100000000000 ]; then
 	    numfmt --to=si --suffix='₿' $((msats / 100000000000))
 	else 
-	    numfmt --to=si --suffix='ˢ' $((msats / 1000))
+	    numfmt --to=si --suffix='s̄' $((msats / 1000))
 	fi
 }
