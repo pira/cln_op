@@ -118,8 +118,11 @@ lcpush() {
 	if [ "$#" -ne 1 ]; then
 		echo "Must specify short_channel_id to rebalance 2Mˢ"
 	else
-		echo "Rebalancing out..."
-		lightning-cli circular-push -k amount=2000000 maxppm=400 filluptopercent=0.41 outscid=$1
+		split=$(( 80000 + $RANDOM ))
+		total_amount=$(( $split * 20 ))
+		readable=`_readable_msats $(( $total_amount * 1000 ))`
+		echo "Rebalancing out $readable..."
+		lightning-cli circular-push -k amount=$total_amount splitamount=$split maxppm=400 filluptopercent=0.41 outscid=$1
 	fi
 }
 #
@@ -128,8 +131,11 @@ lcpull() {
 	if [ "$#" -ne 1 ]; then
 		echo "Must specify short_channel_id to rebalance 2Mˢ"
 	else
-		echo "Rebalancing in..."
-		lightning-cli circular-pull -k amount=2000000 maxoutppm=300 maxppm=400 depleteuptopercent=0.37 depleteuptoamount=2500500 inscid=$1
+		split=$(( 80000 + $RANDOM ))
+		total_amount=$(( $split * 20 ))
+		readable=`_readable_msats $(( $total_amount * 1000 ))`
+		echo "Rebalancing in $readable..."
+		lightning-cli circular-pull -k amount=$total_amount splitamount=$split maxoutppm=300 maxppm=400 depleteuptopercent=0.37 depleteuptoamount=2500500 inscid=$1
 	fi
 }
 # return human readable msat representation
