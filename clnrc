@@ -24,7 +24,11 @@ alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \
 #
 # Set channel fees and htlc limits, appends 99 to ppm, 0 base
 lnchan() {
-	fee="${2}99"
+	if [ ${2} == 0 ]; then
+	    fee="1"
+	else
+	    fee="${2}99"
+	fi
 	peers=`lightning-cli listpeers`
 	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
 	total=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_total ' `
