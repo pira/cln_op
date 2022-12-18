@@ -71,7 +71,7 @@ lnclose() {
 			echo $peer >> $BAD_PEERS
 			echo "Peer $peer marked as bad"
 		fi
-		lightning-cli close -k id="$1" feerange="[1,11]" unilateraltimeout=240 && \
+		lightning-cli close -k id="$1" feerange="[slow,normal]" unilateraltimeout=240 && \
 		echo "Channel $1 closed"
 	fi
 }
@@ -128,7 +128,7 @@ lcpush() {
 		total_amount=$(( $split * 20 ))
 		readable=`_readable_msats $(( $total_amount * 1000 ))`
 		echo "Rebalancing out $readable..."
-		lightning-cli circular-push -k amount=$total_amount splitamount=$split maxppm=400 filluptopercent=0.41 outscid=$1
+		lightning-cli circular-push -k amount=$total_amount splitamount=$split maxppm=100 filluptopercent=0.51 outscid=$1
 	fi
 }
 #
@@ -141,7 +141,7 @@ lcpull() {
 		total_amount=$(( $split * 20 ))
 		readable=`_readable_msats $(( $total_amount * 1000 ))`
 		echo "Rebalancing in $readable..."
-		lightning-cli circular-pull -k amount=$total_amount splitamount=$split maxoutppm=300 maxppm=400 depleteuptopercent=0.37 depleteuptoamount=2500500 inscid=$1
+		lightning-cli circular-pull -k amount=$total_amount splitamount=$split maxoutppm=200 maxppm=100 depleteuptopercent=0.47 depleteuptoamount=2500500 inscid=$1
 	fi
 }
 # return human readable msat representation
