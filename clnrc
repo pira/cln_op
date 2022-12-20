@@ -65,13 +65,16 @@ lnclose() {
 		echo "Must specify short channel id to close"
 	else
 		peer=`lnpeerbychan "$1"`
-		if grep -Fxq "$1" "$BAD_PEERS" ; then
-			echo "Peer $peer was already marked as bad, too bad"
-		else
-			echo $peer >> $BAD_PEERS
-			echo "Peer $peer marked as bad"
-		fi
-		lightning-cli close -k id="$1" feerange="[slow,normal]" unilateraltimeout=240 && \
+		case `grep -Fx "$peer" "$BAD_PEERS" > /dev/null; echo $?` in
+			0)
+				echo "Peer $peer was already marked as bad, too bad"
+				;;
+			1)
+				echo $peer >> $BAD_PEERS
+				echo "Peer $peer marked as bad"
+				;;
+		esac
+		lightning-cli close -k id="$1" feerange="[1,11]" unilateraltimeout=2 && \
 		echo "Channel $1 closed"
 	fi
 }
@@ -81,9 +84,11 @@ lnopen() {
 	if [ "$#" -ne 2 ]; then
 		echo "Must specify node_id and amount (sats) to open a channel"
 	else
-		case `grep -Fx "$1" "$BAD_PEERS" > /dev/null; echo $?` in
+		node_split=(${1//@/ })
+		peer=${node_split[0]}
+		case `grep -Fx "$peer" "$BAD_PEERS" > /dev/null; echo $?` in
 			0)
-				echo "Node $1 is in $BAD_PEERS list, won't proceed!"
+				echo "Node $peer is in $BAD_PEERS list, won't proceed!"
 				;;
 			1)
 				# push_msat= to gift some sats to the peer
