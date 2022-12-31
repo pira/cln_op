@@ -24,7 +24,7 @@ alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \
 #
 # Set channel fees and htlc limits, appends 99 to ppm, 0 base
 lnchan() {
-	if [[ "${2}" -eq 0 ]]; then
+	if [ "${2}1" == '01' ]; then
 	    fee="1"
 	else
 	    fee="${2}99"
