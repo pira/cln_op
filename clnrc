@@ -22,12 +22,12 @@ routed() {
 # Total fees
 alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee' | awk '{n += \$1}; END{print n}' | numfmt --g"
 #
-# Set channel fees and htlc limits, appends 99 to ppm, 0 base
+# Set channel fees and htlc limits, appends 69 to ppm, 0 base
 lnchan() {
 	if [ "${2}1" == '01' ]; then
 	    fee="1"
 	else
-	    fee="${2}99"
+	    fee="${2}69"
 	fi
 	peers=`lightning-cli listpeers`
 	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
