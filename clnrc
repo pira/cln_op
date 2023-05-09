@@ -78,7 +78,7 @@ lnclose() {
 				echo "Peer $peer marked as bad"
 				;;
 		esac
-		lightning-cli close -k id="$1" feerange="[1,11]" unilateraltimeout=2 && \
+		lightning-cli close -k id="$1" feerange="[1,111]" unilateraltimeout=5 && \
 		echo "Channel $1 closed"
 	fi
 }
