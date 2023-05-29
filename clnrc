@@ -12,15 +12,15 @@ alias s='cd $HOME/suez && python3 ./suez --client=c-lightning --show-chan-ids --
 # total routed volume
 routed() {
 	echo "Calculating..."
-	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .out_msatoshi' | awk '{n += \$1}; END{print n}' `
+	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .out_msat' | awk '{n += \$1}; END{print n}' `
 	routed_sats=`_readable_msats $tmp`
-	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .fee' | awk '{n += \$1}; END{print n}' `
+	tmp=`lightning-cli listforwards | jq '.forwards[] | select  (.status == "settled") | .fee_msat' | awk '{n += \$1}; END{print n}' `
 	total_fees=`_readable_msats $tmp`
 	echo "We routed $routed_sats with $total_fees in fees"
 }
 #
 # Total fees
-alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee' | awk '{n += \$1}; END{print n}' | numfmt --g"
+alias fees="lightning-cli listforwards | jq '.forwards[] | select  (.status == \"settled\") | .fee_msat' | awk '{n += \$1}; END{print n}' | numfmt --g"
 #
 # Set channel fees and htlc limits, appends 69 to ppm, 0 base
 lnchan() {
@@ -30,8 +30,8 @@ lnchan() {
 	    fee="${2}69"
 	fi
 	peers=`lightning-cli listpeers`
-	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_to_us ' `
-	total=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .msatoshi_total ' `
+	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .to_us_msat ' `
+	total=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .total_msat ' `
 	if [[ "$total" -eq 0 ]]; then
 	    ratio=0
 	else

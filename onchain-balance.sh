@@ -2,5 +2,7 @@
 
 # Just parses listfunds output to display available onchain balance"
 #
-funds=`lightning-cli listfunds | grep "value" | sed 's/      "value": //g' | sed 's/,//g' | awk '{s+=$1} END {print s}' | numfmt --g`
+funds_msat=`lightning-cli listfunds | jq '.outputs[] | select (.reserved == false) | select(.status == "confirmed") | .amount_msat' | awk '{s+=$1} END {print s}'`
+funds=`echo $((funds_msat / 1000)) | numfmt --g`
+
 echo $funds "sats"
