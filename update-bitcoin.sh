@@ -18,10 +18,18 @@ gpg --verify SHA256SUMS.asc && sha256sum --ignore-missing --check SHA256SUMS
 if [ $? -eq 0 ]; then
   tar xzf bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz && \
   cd bitcoin-${VERSION}/bin && \
+  echo "Restarting bitcoin and cln" && \
+  lightning-cli stop && \
+  sleep 5 && \
   bitcoin-cli stop && \
+  sleep 10 && \
   sudo cp ./* /usr/local/bin/ && \
   start-bitcoin.sh && \
-  rm -f bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz SHA256SUMS SHA256SUMS.asc
+  sleep 5 && \
+  start-ln.sh && \
+  cd && \
+  rm -f bitcoin-${VERSION}-x86_64-linux-gnu.tar.gz SHA256SUMS SHA256SUMS.asc && \
+  echo "Update to bitcoin ${VERSION} successfull!"
 
 else
   echo "Update has failed!"
