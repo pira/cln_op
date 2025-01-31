@@ -57,7 +57,7 @@ lnchan() {
 	size=$((size / 1000 * 1000))
 	human_size=`_readable_msats $size`
         echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
- #       lightning-cli setchannel $1 0 $fee $min_size $size 
+        lightning-cli setchannel $1 0 $fee $min_size $size 
 }
 #
 # list all nodes with liquidity ads
