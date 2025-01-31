@@ -29,9 +29,10 @@ lnchan() {
 	else
 	    fee="${2}69"
 	fi
-	peers=`lightning-cli listpeers`
-	size=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .to_us_msat ' `
-	total=`echo $peers | jq '.peers[] | .channels[] | select( .short_channel_id == "'$1'" ) | .total_msat ' `
+  peer=`lightning-cli listchannels $1 | jq '.channels[] | select(.source == "02fe6a27ddcb2dd9fa8479fe1d52549b5932079a493b51f1409fa2c5878f1bc07c") | .destination'`
+  chan=`lightning-cli listpeerchannels $peer | jq '.channels | .[0]'`
+	size=`echo $chan | jq '.to_us_msat' `
+	total=`echo $chan | jq '.total_msat' `
 	if [[ "$total" -eq 0 ]]; then
 	    ratio=0
 	else
@@ -56,7 +57,7 @@ lnchan() {
 	size=$((size / 1000 * 1000))
 	human_size=`_readable_msats $size`
         echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
-        lightning-cli setchannel $1 0 $fee $min_size $size 
+ #       lightning-cli setchannel $1 0 $fee $min_size $size 
 }
 #
 # list all nodes with liquidity ads
