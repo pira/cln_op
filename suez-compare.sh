@@ -5,6 +5,7 @@
 #
 SUEZ_DIR="$HOME/suez"
 STATUS_DIR='statuses'
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 stamp=`date '+%Y-%m-%d-%H%M%S'`
 
 cd $SUEZ_DIR
@@ -13,7 +14,10 @@ python3 ./suez --show-chan-ids --client=c-lightning | grep '|' | tr -s ' ' | awk
 # Compare two given status files and display result. Recent first
 fn_compare() {
 	#result=`diff -w -U 0 $2 $1`
-	result=`sdiff -w 360 -W -s $2 $1 | sed G | tr '|' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//'` 
+	#result=`sdiff -w 360 -W -s $2 $1 | sed G | tr '|' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//'` 
+  local script_dir
+  result=`awk -f "$SCRIPT_DIR/suez-compare.awk" $2 $1`
+
 	echo "$result"
 }
 
