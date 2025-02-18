@@ -26,8 +26,8 @@ END {
     if ((k in b) && (a[k] != b[k])) {
       split(a[k], f1, " ")
       split(b[k], f2, " ")
-      v1 = sanitize(f1[10])
-      v2 = sanitize(f2[10])
+      v1 = sanitize(f1[col])
+      v2 = sanitize(f2[col])
       diff = abs(v1 - v2)
       changed[k] = diff
       changed1[k] = a[k]
