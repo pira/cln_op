@@ -29,8 +29,11 @@ lnchan() {
 	else
 	    fee="${2}69"
 	fi
-  peer=`lightning-cli listchannels $1 | jq '.channels[] | select(.source == "02fe6a27ddcb2dd9fa8479fe1d52549b5932079a493b51f1409fa2c5878f1bc07c") | .destination'`
-  chan=`lightning-cli listpeerchannels $peer | jq '.channels | .[0]'`
+  chan=`lightning-cli listpeerchannels | jq --arg chanid $1 '.channels[] | select(.short_channel_id == $chanid)'`
+  if [ -z "$chan" ]; then
+    echo "Channel not found, aborting"
+    return
+  fi
 	size=`echo $chan | jq '.to_us_msat' `
 	total=`echo $chan | jq '.total_msat' `
 	if [[ "$total" -eq 0 ]]; then
@@ -40,14 +43,15 @@ lnchan() {
 	fi
 	# ratio is percent of channel liquidity on our side	
 	# we want to limit max_htlc severely on depleting channels while allowing rebalances
+  rnd=$((RANDOM % ($size / 10) + 1))
 	if [ $ratio -gt 60 ]; then
-	    size=$((size / 2 + $RANDOM))
+	    size=$((size / 2 + $rnd))
 	elif [ $ratio -gt 40 ]; then
-	    size=$((size / 3 + $RANDOM))
+	    size=$((size / 3 + $rnd))
 	elif [ $ratio -gt 20 ]; then
-	    size=$((size / 5 + $RANDOM))
+	    size=$((size / 5 + $rnd))
 	elif [ $ratio -gt 5 ]; then
-	    size=$((size / 10 + $RANDOM))
+	    size=$((size / 10 + $rnd))
 	else
 	    size=$((size / 20))
 	fi
@@ -56,8 +60,8 @@ lnchan() {
 	# round up to sats	
 	size=$((size / 1000 * 1000))
 	human_size=`_readable_msats $size`
-        echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
-        lightning-cli setchannel $1 0 $fee $min_size $size 
+  echo "Setting channel fees to $fee and max htlc to $human_size (channel has $ratio% on our side)"
+  lightning-cli setchannel $1 0 $fee $min_size $size 
 }
 #
 # list all nodes with liquidity ads
@@ -120,10 +124,10 @@ lnopendual() {
 # finds peer id by short channel id
 lnpeerbychan() {
 	if [ "$#" -ne 1 ]; then
-                echo "Must specify short_channel_id to lookup peer id"
-        else
-		lightning-cli listpeers | jq '.peers[] | select( .channels[].short_channel_id == "'$1'" ) | .id' | sed s/\"//g
-        fi
+    echo "Must specify short_channel_id to lookup peer id"
+  else
+    lightning-cli listpeerchannels | jq --arg chanid $1 '.channels[] | select(.short_channel_id == $chanid) | .peer_id'  | sed s/\"//g
+  fi
 }
 #
 # Couple rebalancing commands, you will need circular plugin for them to work:
