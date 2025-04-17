@@ -43,7 +43,11 @@ lnchan() {
 	fi
 	# ratio is percent of channel liquidity on our side	
 	# we want to limit max_htlc severely on depleting channels while allowing rebalances
-  rnd=$((RANDOM % ($size / 10) + 1))
+  if [ $size -gt 10 ]; then
+    rnd=$((RANDOM % ($size / 10) + 1))
+  else
+    rnd=0
+  fi
 	if [ $ratio -gt 60 ]; then
 	    size=$((size / 2 + $rnd))
 	elif [ $ratio -gt 40 ]; then
