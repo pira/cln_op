@@ -26,9 +26,12 @@ END {
     if ((k in b) && (a[k] != b[k])) {
       split(a[k], f1, " ")
       split(b[k], f2, " ")
-      v1 = sanitize(f1[col])
-      v2 = sanitize(f2[col])
-      diff = abs(v1 - v2)
+      # column 5 is our balance, column 10 is satoshi income
+      v1 = sanitize(f1[5])
+      v2 = sanitize(f2[5])
+      v3 = sanitize(f1[10])
+      v4 = sanitize(f2[10])
+      diff = abs(v1 - v2) + 1000 * abs(v3 - v4)
       changed[k] = diff
       changed1[k] = a[k]
       changed2[k] = b[k]
