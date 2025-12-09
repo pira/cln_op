@@ -20,10 +20,12 @@ if [ $? -eq 0 ]; then
   cd bitcoin-${VERSION}/bin && \
   echo "Restarting bitcoin and cln" && \
   lightning-cli stop && \
+  sudo service tor stop && \
   sleep 5 && \
   bitcoin-cli stop && \
   sleep 10 && \
   sudo cp ./* /usr/local/bin/ && \
+  sudo service tor start && \
   start-bitcoin.sh && \
   sleep 5 && \
   start-ln.sh && \

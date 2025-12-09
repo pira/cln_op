@@ -1,9 +1,9 @@
 #!/usr/bin/awk -f
-# compare_files.awk
-
+# Compare two suez outputs and list differences sorted by channel changes between two snapshots
+# channel change is defined as change in our balance plus 1000x change in satoshi income from the channel
+# called from a wrapper shell
+#
 BEGIN {
-  # column number to check differences on - 10 for sats income, 5 for our balance
-  if (!col) col = 5
 }
 
 # Function definitions
@@ -13,7 +13,7 @@ function sanitize(x) {
   return (x ~ /^[0-9]+(\.[0-9]+)?$/) ? x+0 : 0
 }
 
-# Read file1: store each line by its key (first column)
+# Read file1: store each line by its key (first column is channel short id)
 FNR==NR { a[$1]=$0; next }
 
 # Read file2 similarly
